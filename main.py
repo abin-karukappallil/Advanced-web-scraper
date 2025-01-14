@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup as bs
 import requests as req
 from tabulate import tabulate
+import os
 
 def srape(url,element):
   try:
@@ -73,14 +74,22 @@ def dork(url):
     d=soup.find_all('a')
     if url.startswith("https://"):
         url2 = url.replace("https://","")
+    else:
+        url2 = url.replace("http://","")
     for i in d:
       href=i.get('href')
+      _dir = os.getcwd()
+      file = f"{_dir}/Results/links.txt"
       if href.startswith(f"/url?q=https://{url2}") or href.startswith(f"/url?q=http://www.{url2}") or href.startswith(f"/url?q=https://www.{url2}") or href.startswith(f"/url?q=http://"):
           _fil_link = href.replace("/url?q=","")
-          print(_fil_link)
+          os.makedirs(os.path.dirname(file), exist_ok=True)
+          with open(file, "a") as f:
+              f.write(f"{_fil_link}\n")
   except Exception as e:
     print("Error in fetching the data",e)
+
         
+
 url = input("Enter the URL: ")
 choice = input("\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
 if choice == '1':
