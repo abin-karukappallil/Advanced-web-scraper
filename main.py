@@ -64,9 +64,25 @@ def scrape_links(url):
             print(i.get('href'))
     except Exception as e:
         print("Error in fetching the data",e)
+def dork(url):
+  try:
+    dork = f'https://www.google.com/search?q=site:{url} ext:txt | ext:pdf | ext:xml | ext:xls | ext:xlsx | ext:ppt | ext:pptx | ext:doc | ext:docx intext:“confidential” | intext:“Not for Public Release” | intext:”internal use only” | intext:“do not distribute”'
+    res = req.get(dork)
+    soup = bs(res.text, 'html.parser')
+    #print(soup)
+    d=soup.find_all('a')
+    if url.startswith("https://"):
+        url2 = url.replace("https://","")
+    for i in d:
+      href=i.get('href')
+      if href.startswith(f"/url?q=https://{url2}") or href.startswith(f"/url?q=http://www.{url2}") or href.startswith(f"/url?q=https://www.{url2}") or href.startswith(f"/url?q=http://"):
+          _fil_link = href.replace("/url?q=","")
+          print(_fil_link)
+  except Exception as e:
+    print("Error in fetching the data",e)
         
 url = input("Enter the URL: ")
-choice = input("\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\nChoose an option:")
+choice = input("\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
 if choice == '1':
     _class = input("Enter the class you want to scrape: ")
     _id = input("Enter the attribute you want to scrape else press 0: ")
@@ -78,3 +94,5 @@ elif choice == '3':
     id = input("Enter the element you want to scrape: ")
 elif choice == '4':
     scrape_links(url)
+elif choice == '5':
+    dork(url)
