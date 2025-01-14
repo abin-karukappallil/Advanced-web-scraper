@@ -93,6 +93,7 @@ def dork(url):
 
 styled_text=pyfiglet.figlet_format('WEB SCRAPPER',font= 'doom')
 print(Fore.BLUE + styled_text)
+print(Fore.LIGHTBLUE_EX + "https://github.com/abin-karukappallil/WebScraper\n"+Fore.WHITE)
 url = input("Enter the URL: ")
 choice = input(Fore.BLUE + "\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
 if choice == '1':
