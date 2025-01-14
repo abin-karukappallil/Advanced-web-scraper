@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup as bs
 import requests as req
 from tabulate import tabulate
 import os
+from colorama import Fore
+import pyfiglet 
 
 def srape(url,element):
   try:
@@ -27,7 +29,7 @@ def srape(url,element):
             print(d)
             print("\n")
   except Exception as e:
-    print("Error in scraping the data")
+    print(Fore.RED +"Error in scraping the data")
 
 def scrape(url,_class,_id):
     try:
@@ -50,7 +52,7 @@ def scrape(url,_class,_id):
                  attribute_value = i.get(_id, "Attribute not found")
                  print(f"{_id}: {attribute_value}")
     except Exception as e:
-        print("Error in fetching the data",e)
+        print(Fore.RED +"Error in fetching the data",e)
             
 def scrape_links(url):
     try:
@@ -64,7 +66,7 @@ def scrape_links(url):
          for i in d:
             print(i.get('href'))
     except Exception as e:
-        print("Error in fetching the data",e)
+        print(Fore.RED +"Error in fetching the data",e)
 def dork(url):
   try:
     dork = f'https://www.google.com/search?q=site:{url} ext:txt | ext:pdf | ext:xml | ext:xls | ext:xlsx | ext:ppt | ext:pptx | ext:doc | ext:docx intext:“confidential” | intext:“Not for Public Release” | intext:”internal use only” | intext:“do not distribute”'
@@ -81,17 +83,18 @@ def dork(url):
       _dir = os.getcwd()
       file = f"{_dir}/Results/links.txt"
       if href.startswith(f"/url?q=https://{url2}") or href.startswith(f"/url?q=http://www.{url2}") or href.startswith(f"/url?q=https://www.{url2}") or href.startswith(f"/url?q=http://"):
-          _fil_link = href.replace("/url?q=","")
+          _fil_link = (href.replace("/url?q=","").split("&")[0]).replace("25","")
           os.makedirs(os.path.dirname(file), exist_ok=True)
           with open(file, "a") as f:
               f.write(f"{_fil_link}\n")
+    print(Fore.YELLOW +"The links are saved in Results/links.txt"+Fore.WHITE)
   except Exception as e:
-    print("Error in fetching the data",e)
+    print(Fore.RED +"Error in fetching the data",e)
 
-        
-
+styled_text=pyfiglet.figlet_format('WEB SCRAPPER',font= 'doom')
+print(Fore.BLUE + styled_text)
 url = input("Enter the URL: ")
-choice = input("\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
+choice = input(Fore.BLUE + "\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
 if choice == '1':
     _class = input("Enter the class you want to scrape: ")
     _id = input("Enter the attribute you want to scrape else press 0: ")
