@@ -70,7 +70,10 @@ def scrape_links(url):
 def dork(url):
   try:
     dork = f'https://www.google.com/search?q=site:{url} ext:txt | ext:pdf | ext:xml | ext:xls | ext:xlsx | ext:ppt | ext:pptx | ext:doc | ext:docx intext:“confidential” | intext:“Not for Public Release” | intext:”internal use only” | intext:“do not distribute”'
-    res = req.get(dork)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
+    res = req.get(dork, headers=headers, timeout=1000)
+    res.raise_for_status() 
     soup = bs(res.text, 'html.parser')
     #print(soup)
     d=soup.find_all('a')
@@ -82,11 +85,10 @@ def dork(url):
       href=i.get('href')
       _dir = os.getcwd()
       file = f"{_dir}/Results/links.txt"
-      if href.startswith(f"/url?q=https://{url2}") or href.startswith(f"/url?q=http://www.{url2}") or href.startswith(f"/url?q=https://www.{url2}") or href.startswith(f"/url?q=http://"):
-          _fil_link = (href.replace("/url?q=","").split("&")[0]).replace("25","")
-          os.makedirs(os.path.dirname(file), exist_ok=True)
-          with open(file, "a") as f:
-              f.write(f"{_fil_link}\n")
+      _fil_link = (href.replace("/url?q=","").split("&")[0]).replace("25","")
+      os.makedirs(os.path.dirname(file), exist_ok=True)
+      with open(file, "a") as f:
+        f.write(f"{_fil_link}\n")
     print(Fore.YELLOW +"The links are saved in Results/links.txt"+Fore.WHITE)
   except Exception as e:
     print(Fore.RED +"Error in fetching the data",e)
