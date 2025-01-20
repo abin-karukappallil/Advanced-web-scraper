@@ -74,7 +74,6 @@ def dork(url):
     soup = bs(res.text, 'html.parser')
     #print(soup)
     d=soup.find_all('a')
-    print(d)
     if url.startswith("https://"):
         url2 = url.replace("https://","")
     else:
@@ -92,7 +91,7 @@ def dork(url):
   except Exception as e:
     print(Fore.RED +"Error in fetching the data",e)
 
-styled_text=pyfiglet.figlet_format('WEB SCRAPPER',font= 'doom')
+styled_text=pyfiglet.figlet_format('WEB SCRAPER',font= 'doom')
 print(Fore.BLUE + styled_text)
 print(Fore.LIGHTBLUE_EX + "https://github.com/abin-karukappallil/Advanced-web-scraper\n"+Fore.WHITE)
 url = input("Enter the URL: ")
