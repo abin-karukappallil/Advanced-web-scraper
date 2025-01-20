@@ -74,6 +74,7 @@ def dork(url):
     soup = bs(res.text, 'html.parser')
     #print(soup)
     d=soup.find_all('a')
+    print(d)
     if url.startswith("https://"):
         url2 = url.replace("https://","")
     else:
@@ -93,7 +94,7 @@ def dork(url):
 
 styled_text=pyfiglet.figlet_format('WEB SCRAPPER',font= 'doom')
 print(Fore.BLUE + styled_text)
-print(Fore.LIGHTBLUE_EX + "https://github.com/abin-karukappallil/WebScraper\n"+Fore.WHITE)
+print(Fore.LIGHTBLUE_EX + "https://github.com/abin-karukappallil/Advanced-web-scraper\n"+Fore.WHITE)
 url = input("Enter the URL: ")
 choice = input(Fore.BLUE + "\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
 if choice == '1':
