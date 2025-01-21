@@ -4,6 +4,9 @@ from tabulate import tabulate
 import os
 from colorama import Fore
 import pyfiglet 
+from fastapi import FastAPI,HTTPException,Query
+
+app=FastAPI()
 
 def srape(url,element):
   try:
@@ -14,17 +17,19 @@ def srape(url,element):
     soup = bs(data, 'html.parser')
     if element=='table':
         t = soup.find_all('table')
+        results=[]
         for _tt in t:
             rows = _tt.find_all('tr')
             header = [th.text.strip() for th in rows[0].find_all('th')] 
             data = [[td.text.strip() for td in row.find_all('td')] for row in rows[1:]] 
-            print(tabulate(data, headers=header, tablefmt="grid"))  
-            print("\n")
+            #print(tabulate(data, headers=header, tablefmt="grid"))  
+            results.append({"header":header,"data":data})
+            return results
     else:
         d=soup.find_all(element)
         #print(d)
         if len(d)==0:
-            print("No such element found")
+            return "No such element found"
         else:
             print(d)
             print("\n")
@@ -42,6 +47,7 @@ def scrape(url,_class,_id):
        # print(soup.prettify())
 
         d = soup.find_all(class_=_class)
+        results = []
         #print(d)
         if len(d)==0:
             print("No such class found")
@@ -51,6 +57,7 @@ def scrape(url,_class,_id):
                 if _id:
                  attribute_value = i.get(_id, "Attribute not found")
                  print(f"{_id}: {attribute_value}")
+                 result.append({"text":elemement_text, "attribute":attribute_value}) 
     except Exception as e:
         print(Fore.RED +"Error in fetching the data",e)
             
@@ -63,10 +70,12 @@ def scrape_links(url):
          data = res.text
          soup = bs(data, 'html.parser')
          d=soup.find_all('a')
-         print(d)
-         for i in d:
-            print(i)
-            print(i.get('href'))
+        #  print(d)
+        #  for i in d:
+        #     print(i)
+        #     print(i.get('href'))
+         links = [{"href": a.get("href"), "text": a.text.strip()} for a in soup.find_all('a')]
+         return links
     except Exception as e:
         print(Fore.RED +"Error in fetching the data",e)
 def dork(url):
@@ -81,25 +90,41 @@ def dork(url):
         headers = {"User-Agent": ua.random}
         res = req.get(url1, headers=headers)
         datas = res.json()
-        for i in datas:
-            print(i[2])
+        return [item[2] for item in data if len(item) > 2]
     except Exception as e:
         print(e)
-styled_text=pyfiglet.figlet_format('WEB SCRAPER',font= 'doom')
-print(Fore.BLUE + styled_text)
-print(Fore.LIGHTBLUE_EX + "https://github.com/abin-karukappallil/Advanced-web-scraper\n"+Fore.WHITE)
-url = input("Enter the URL: ")
-choice = input(Fore.BLUE + "\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
-if choice == '1':
-    _class = input("Enter the class you want to scrape: ")
-    _id = input("Enter the attribute you want to scrape else press 0: ")
-    scrape(url,_class,_id)
-elif choice == '2':
-    element = input("Enter the element you want to scrape: ")
-    srape(url,element)
-elif choice == '3':
-    id = input("Enter the element you want to scrape: ")
-elif choice == '4':
-    scrape_links(url)
-elif choice == '5':
-    dork(url)
+# styled_text=pyfiglet.figlet_format('WEB SCRAPER',font= 'doom')
+# print(Fore.BLUE + styled_text)
+# print(Fore.LIGHTBLUE_EX + "https://github.com/abin-karukappallil/Advanced-web-scraper\n"+Fore.WHITE)
+# url = input("Enter the URL: ")
+# choice = input(Fore.BLUE + "\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
+# if choice == '1':
+#     _class = input("Enter the class you want to scrape: ")
+#     _id = input("Enter the attribute you want to scrape else press 0: ")
+#     scrape(url,_class,_id)
+# elif choice == '2':
+#     element = input("Enter the element you want to scrape: ")
+#     srape(url,element)
+# elif choice == '3':
+#     id = input("Enter the element you want to scrape: ")
+# elif choice == '4':
+#     scrape_links(url)
+# elif choice == '5':
+#     dork(url)
+
+@app.post("/scrape-element")
+def scrape_element(url:str,element:str):
+    try:
+        result= scrape(url,element)
+        return {"data": result}
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+
+@app.post("/scrape-class")
+def scrape_lnk(url:str):
+    try:
+        result= scrape_links(url)
+        return {"links": result}
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+    
