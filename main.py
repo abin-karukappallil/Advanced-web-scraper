@@ -78,11 +78,24 @@ def dork(url):
         else:
             url2=url
         url1 = f"https://web.archive.org/cdx/search/cdx?url={url2}&collapse=urlkey&matchType=prefix&filter=mimetype:application/pdf&collapse=digest&output=json"
-        headers = {"User-Agent": ua.random}
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
         res = req.get(url1, headers=headers)
         datas = res.json()
-        for i in datas:
+        _dir = os.getcwd()
+        file = f"{_dir}/Results/links.txt"
+        if datas:
+         for i in datas:
+            timestamp=i[1]
+            links=i[2]
+            timestamp=str(timestamp)+"if_"
+            _fil_link = f"https://web.archive.org/web/{timestamp}/{links}"
+            os.makedirs(os.path.dirname(file), exist_ok=True)
+            with open(file, "a") as f:
+              f.write(f"{_fil_link}\n")
             print(i[2])
+         print(Fore.YELLOW +"The links are saved in Results/links.txt"+Fore.WHITE)
+        else:
+            print("No data found")
     except Exception as e:
         print(e)
 styled_text=pyfiglet.figlet_format('WEB SCRAPER',font= 'doom')

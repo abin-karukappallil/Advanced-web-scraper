@@ -5,9 +5,25 @@ import os
 from colorama import Fore
 import pyfiglet 
 from fastapi import FastAPI,HTTPException,Query
+from fastapi.responses import FileResponse
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-app=FastAPI()
+app = FastAPI()
 
+origins = [
+    "http://localhost:3001",  
+    "http://127.0.0.1:3001",
+]
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, 
+    allow_credentials=True,  
+    allow_methods=["*"], 
+    allow_headers=["*"], 
+)
 def srape(url,element):
   try:
     headers = {
@@ -27,16 +43,15 @@ def srape(url,element):
             return results
     else:
         d=soup.find_all(element)
-        #print(d)
         if len(d)==0:
             return "No such element found"
         else:
-            print(d)
-            print("\n")
+            for i in d:
+                return i.get_text(strip=True)
   except Exception as e:
     print(Fore.RED +"Error in scraping the data")
 
-def scrape(url,_class,_id):
+def scrape(url,_class):
     try:
         headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
@@ -48,16 +63,14 @@ def scrape(url,_class,_id):
 
         d = soup.find_all(class_=_class)
         results = []
-        #print(d)
         if len(d)==0:
             print("No such class found")
         else:
             for i in d:
-                print(i.get_text(strip=True))
-                if _id:
-                 attribute_value = i.get(_id, "Attribute not found")
-                 print(f"{_id}: {attribute_value}")
-                 result.append({"text":elemement_text, "attribute":attribute_value}) 
+                elemement_text = i.get_text(strip=True)
+                print(elemement_text)
+                results.append(elemement_text+" ") 
+                return results
     except Exception as e:
         print(Fore.RED +"Error in fetching the data",e)
             
@@ -70,12 +83,13 @@ def scrape_links(url):
          data = res.text
          soup = bs(data, 'html.parser')
          d=soup.find_all('a')
-        #  print(d)
-        #  for i in d:
-        #     print(i)
-        #     print(i.get('href'))
-         links = [{"href": a.get("href"), "text": a.text.strip()} for a in soup.find_all('a')]
-         return links
+         _dir = os.getcwd()
+         file = f"{_dir}/Results/hiddenlinks.txt"
+         for i in d:
+             _fil_link = i.get('href')
+             os.makedirs(os.path.dirname(file), exist_ok=True)
+             with open(file, "a") as f:
+                f.write(f"{_fil_link}\n")
     except Exception as e:
         print(Fore.RED +"Error in fetching the data",e)
 def dork(url):
@@ -87,44 +101,57 @@ def dork(url):
         else:
             url2=url
         url1 = f"https://web.archive.org/cdx/search/cdx?url={url2}&collapse=urlkey&matchType=prefix&filter=mimetype:application/pdf&collapse=digest&output=json"
-        headers = {"User-Agent": ua.random}
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
         res = req.get(url1, headers=headers)
         datas = res.json()
-        return [item[2] for item in data if len(item) > 2]
+        _dir = os.getcwd()
+        file = f"{_dir}/Results/links.txt"
+        if datas:
+         for i in datas:
+            timestamp=i[1]
+            links=i[2]
+            timestamp=str(timestamp)+"if_"
+            _fil_link = f"https://web.archive.org/web/{timestamp}/{links}"
+            os.makedirs(os.path.dirname(file), exist_ok=True)
+            with open(file, "a") as f:
+              f.write(f"{_fil_link}\n")
+            print(i[2])
+         print(Fore.YELLOW +"The links are saved in Results/links.txt"+Fore.WHITE)
+        else:
+            print("No data found")
     except Exception as e:
-        print(e)
-# styled_text=pyfiglet.figlet_format('WEB SCRAPER',font= 'doom')
-# print(Fore.BLUE + styled_text)
-# print(Fore.LIGHTBLUE_EX + "https://github.com/abin-karukappallil/Advanced-web-scraper\n"+Fore.WHITE)
-# url = input("Enter the URL: ")
-# choice = input(Fore.BLUE + "\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
-# if choice == '1':
-#     _class = input("Enter the class you want to scrape: ")
-#     _id = input("Enter the attribute you want to scrape else press 0: ")
-#     scrape(url,_class,_id)
-# elif choice == '2':
-#     element = input("Enter the element you want to scrape: ")
-#     srape(url,element)
-# elif choice == '3':
-#     id = input("Enter the element you want to scrape: ")
-# elif choice == '4':
-#     scrape_links(url)
-# elif choice == '5':
-#     dork(url)
+        return e
 
-@app.post("/scrape-element")
+@app.get("/scrape-element")
 def scrape_element(url:str,element:str):
     try:
-        result= scrape(url,element)
+        result= srape(url,element)
         return {"data": result}
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
 
-@app.post("/scrape-class")
+@app.get("/scrape-hiddenlinks")
 def scrape_lnk(url:str):
     try:
-        result= scrape_links(url)
-        return {"links": result}
+        scrape_links(url)
+        _dir = os.getcwd()
+        file = f"{_dir}/Results/hiddenlinks.txt"
+        return FileResponse(file, media_type="application/octet-stream", filename="hiddenlinks.txt")
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
-    
+@app.get("/confi-doc")
+def scrape_confidential(url:str):
+    try:
+        dork(url)
+        _dir = os.getcwd()
+        fileP = f"{_dir}/Results/links.txt"
+        return FileResponse(fileP, media_type="application/octet-stream", filename="documentlinks.txt")
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+@app.get("/scrape-class")
+def scrape_element(url:str,_class:str):
+    try:
+        result= scrape(url,_class)
+        return {"text": result}
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
