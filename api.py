@@ -8,12 +8,12 @@ from fastapi import FastAPI,HTTPException,Query
 from fastapi.responses import FileResponse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+import re
 app = FastAPI()
 
 origins = [
-    "http://localhost:3001",  
-    "http://127.0.0.1:3001",
+    "http://localhost:3000",  
+    "http://127.0.0.1:3000",
 ]
 
 # Add CORS middleware
@@ -60,17 +60,20 @@ def scrape(url,_class):
         data = res.text
         soup = bs(data, 'html.parser')
        # print(soup.prettify())
-
-        d = soup.find_all(class_=_class)
+        elements = soup.find_all(class_=_class)
         results = []
-        if len(d)==0:
-            print("No such class found")
+        if not elements:
+            print(Fore.YELLOW + "No elements found with the specified class.")
         else:
-            for i in d:
-                elemement_text = i.get_text(strip=True)
-                print(elemement_text)
-                results.append(elemement_text+" ") 
-                return results
+            for element in elements:
+                text = element.get_text(separator=' | ', strip=True)
+                split_items = text.split(" | ")
+                results.extend(split_items)
+        response = [{"id": i + 1, "data": item} for i, item in enumerate(results)]
+        print(Fore.GREEN + "Formatted Output:\n")
+        for item in response:
+            print(f"id: {item['id']}, data: {item['data']}")
+        return response
     except Exception as e:
         print(Fore.RED +"Error in fetching the data",e)
             
@@ -115,8 +118,8 @@ def dork(url):
             os.makedirs(os.path.dirname(file), exist_ok=True)
             with open(file, "a") as f:
               f.write(f"{_fil_link}\n")
-            print(i[2])
-         print(Fore.YELLOW +"The links are saved in Results/links.txt"+Fore.WHITE)
+            #print(i[2])
+         #print(Fore.YELLOW +"The links are saved in Results/links.txt"+Fore.WHITE)
         else:
             print("No data found")
     except Exception as e:
@@ -133,25 +136,34 @@ def scrape_element(url:str,element:str):
 @app.get("/scrape-hiddenlinks")
 def scrape_lnk(url:str):
     try:
-        scrape_links(url)
         _dir = os.getcwd()
-        file = f"{_dir}/Results/hiddenlinks.txt"
-        return FileResponse(file, media_type="application/octet-stream", filename="hiddenlinks.txt")
+        fileP = f"{_dir}/Results/hiddenlinks.txt"
+        if os.path.exists(fileP):
+            os.remove(fileP)
+            open(fileP, 'w').close()
+        scrape_links(url)
+        return FileResponse(fileP, media_type="application/octet-stream", filename="hiddenlinks.txt")
     except Exception as e:
+        print(traceback.format_exc())
+        return {"error": str(e)}, 500
         raise HTTPException(status_code=500,detail=str(e))
 @app.get("/confi-doc")
 def scrape_confidential(url:str):
     try:
-        dork(url)
         _dir = os.getcwd()
         fileP = f"{_dir}/Results/links.txt"
-        return FileResponse(fileP, media_type="application/octet-stream", filename="documentlinks.txt")
+        if os.path.exists(fileP):
+            os.remove(fileP)
+            open(fileP, 'w').close()
+        dork(url)
+        response= FileResponse(fileP, media_type="application/octet-stream", filename="documentlinks.txt")
+        return response
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
 @app.get("/scrape-class")
 def scrape_element(url:str,_class:str):
     try:
         result= scrape(url,_class)
-        return {"text": result}
+        return result
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
