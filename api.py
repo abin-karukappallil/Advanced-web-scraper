@@ -145,7 +145,10 @@ def dork(url):
             #print(i[2])
          #print(Fore.YELLOW +"The links are saved in Results/links.txt"+Fore.WHITE)
         else:
-            print("No data found")
+            os.makedirs(os.path.dirname(file), exist_ok=True)
+            with open(file, "a") as f:
+              f.write("no documents found")
+            return "No documents found"
     except Exception as e:
         return e
 @app.get("/")
