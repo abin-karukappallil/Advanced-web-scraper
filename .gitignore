@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+.vercel
 # Distribution / packaging
 .Python
 build/

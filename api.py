@@ -2,21 +2,21 @@ from bs4 import BeautifulSoup as bs
 import requests as req
 from tabulate import tabulate
 import os
-from colorama import Fore
-import pyfiglet 
 from fastapi import FastAPI,HTTPException,Query
 from fastapi.responses import FileResponse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import re
+import traceback
+
 app = FastAPI()
 
+# CORS configuration
 origins = [
     "http://localhost:3000",  
     "http://127.0.0.1:3000",
 ]
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins, 
@@ -63,19 +63,19 @@ def scrape(url,_class):
         elements = soup.find_all(class_=_class)
         results = []
         if not elements:
-            print(Fore.YELLOW + "No elements found with the specified class.")
+            print("No elements found with the specified class.")
         else:
             for element in elements:
                 text = element.get_text(separator=' | ', strip=True)
                 split_items = text.split(" | ")
                 results.extend(split_items)
         response = [{"id": i + 1, "data": item} for i, item in enumerate(results)]
-        print(Fore.GREEN + "Formatted Output:\n")
+        print("Formatted Output:\n")
         for item in response:
             print(f"id: {item['id']}, data: {item['data']}")
         return response
     except Exception as e:
-        print(Fore.RED +"Error in fetching the data",e)
+        print("Error in fetching the data",e)
             
 def scrape_links(url):
     try:
@@ -94,7 +94,7 @@ def scrape_links(url):
              with open(file, "a") as f:
                 f.write(f"{_fil_link}\n")
     except Exception as e:
-        print(Fore.RED +"Error in fetching the data",e)
+        print("Error in fetching the data",e)
 def dork(url):
     try:
         if url.startswith("https://"):
@@ -124,7 +124,9 @@ def dork(url):
             print("No data found")
     except Exception as e:
         return e
-
+@app.get("/")
+def read_root():
+    return {"message": "Web Scraping API is running"}
 @app.get("/scrape-element")
 def scrape_element(url:str,element:str):
     try:

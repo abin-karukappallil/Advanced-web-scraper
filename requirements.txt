@@ -1,5 +1,7 @@
-bs4
+beautifulsoup4
 requests
 tabulate
 colorama
 pyfiglet
+fastapi
+python-multipart
