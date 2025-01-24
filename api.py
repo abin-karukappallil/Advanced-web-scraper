@@ -30,7 +30,7 @@ def srape(url, element):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
         } 
         res = req.get(url, headers=headers, timeout=40)
-        res.raise_for_status()  # Raises HTTPError for bad responses (4xx and 5xx)
+        res.raise_for_status() 
         data = res.text
         soup = bs(data, 'html.parser')
 
@@ -42,7 +42,7 @@ def srape(url, element):
                 header = [th.text.strip() for th in rows[0].find_all('th')] 
                 data = [[td.text.strip() for td in row.find_all('td')] for row in rows[1:]]  
                 results.append({"id": i, "data": {"header": header, "data": data}})
-            return results  # Return the list of tables with ids and headers/data
+            return results  
         else:
             elements = soup.find_all(element)
             if not elements:
