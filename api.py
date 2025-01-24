@@ -24,33 +24,32 @@ app.add_middleware(
     allow_methods=["*"], 
     allow_headers=["*"], 
 )
-def srape(url,element):
-  try:
-    headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"} 
-    res = req.get(url, headers=headers, timeout=400)
-    data = res.text
-    soup = bs(data, 'html.parser')
-    if element=='table':
-        t = soup.find_all('table')
-        results=[]
-        for _tt in t:
-            rows = _tt.find_all('tr')
-            header = [th.text.strip() for th in rows[0].find_all('th')] 
-            data = [[td.text.strip() for td in row.find_all('td')] for row in rows[1:]] 
-            #print(tabulate(data, headers=header, tablefmt="grid"))  
-            results.append({"header":header,"data":data})
-            return results
-    else:
-        d=soup.find_all(element)
-        if len(d)==0:
-            return "No such element found"
-        else:
-            for i in d:
-                return i.get_text(strip=True)
-  except Exception as e:
-    print(Fore.RED +"Error in scraping the data")
+def srape(url, element):
+   try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
+        } 
+        res = req.get(url, headers=headers, timeout=40)
+        res.raise_for_status()  # Raises HTTPError for bad responses (4xx and 5xx)
+        data = res.text
+        soup = bs(data, 'html.parser')
 
+        if element == 'table':
+            tables = soup.find_all('table')
+            results = []
+            for i, table in enumerate(tables, start=1):
+                rows = table.find_all('tr')
+                header = [th.text.strip() for th in rows[0].find_all('th')] 
+                data = [[td.text.strip() for td in row.find_all('td')] for row in rows[1:]]  
+                results.append({"id": i, "data": {"header": header, "data": data}})
+            return results  # Return the list of tables with ids and headers/data
+        else:
+            elements = soup.find_all(element)
+            if not elements:
+                return [{"id": "", "data": "No such element found"}]
+            return [{"id": i + 1, "data": el.get_text(strip=True)} for i, el in enumerate(elements)]
+   except Exception as e:
+        return str(e)
 def scrape(url,_class):
     try:
         headers = {
@@ -75,8 +74,33 @@ def scrape(url,_class):
             print(f"id: {item['id']}, data: {item['data']}")
         return response
     except Exception as e:
-        print("Error in fetching the data",e)
-            
+        return "Error in scraping the data"
+def idScrape(url,_id):
+    try:
+        headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
+        res = req.get(url, headers=headers, timeout=600)
+        res.raise_for_status() 
+        data = res.text
+        soup = bs(data, 'html.parser')
+       # print(soup.prettify())
+        elements = soup.find(id=_id)
+        results = []
+        if not elements:
+            return "No elements found with the specified class."
+        else:
+            for element in elements:
+                text = element.get_text(separator=' | ', strip=True)
+                split_items = text.split(" | ")
+                results.extend(split_items)
+        response = [{"id": i + 1, "data": item} for i, item in enumerate(results)]
+        print("Formatted Output:\n")
+        for item in response:
+            print(f"id: {item['id']}, data: {item['data']}")
+        return response
+    except Exception as e:
+       return "Error in scraping the data"
+             
 def scrape_links(url):
     try:
          headers = {
@@ -94,7 +118,7 @@ def scrape_links(url):
              with open(file, "a") as f:
                 f.write(f"{_fil_link}\n")
     except Exception as e:
-        print("Error in fetching the data",e)
+        return "Error in scraping the data"
 def dork(url):
     try:
         if url.startswith("https://"):
@@ -131,7 +155,7 @@ def read_root():
 def scrape_element(url:str,element:str):
     try:
         result= srape(url,element)
-        return {"data": result}
+        return result;
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
 
@@ -166,6 +190,13 @@ def scrape_confidential(url:str):
 def scrape_element(url:str,_class:str):
     try:
         result= scrape(url,_class)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+@app.get("/scrape-id")
+def scrape_id(url:str,_id:str):
+    try:
+        result= idScrape(url,_id)
         return result
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
