@@ -20,13 +20,24 @@ origins = [
     "http://127.0.0.1:3000",
 ]
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# You can add additional URLs to this list, for example, the frontend's production domain, or other frontends.
+allowed_origins = [
+    "http://localhost:3000"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, 
-    allow_credentials=True,  
-    allow_methods=["*"], 
-    allow_headers=["*"], 
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["X-Requested-With", "Content-Type"],
 )
+
 def srape(url, element):
    try:
         headers = {
