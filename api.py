@@ -59,7 +59,7 @@ def scrape(url,_class):
     try:
         headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
-        res = req.get(url, headers=headers, timeout=9000)
+        res = req.get(url, headers=headers)
         res.raise_for_status() 
         data = res.text
         soup = bs(data, 'html.parser')
@@ -110,7 +110,7 @@ def scrape_links(url):
     try:
          headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
-         res = req.get(url, headers=headers, timeout=9000)
+         res = req.get(url, headers=headers)
          res.raise_for_status() 
          data = res.text
          soup = bs(data, 'html.parser')
