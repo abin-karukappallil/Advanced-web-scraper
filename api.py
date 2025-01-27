@@ -13,7 +13,9 @@ app = FastAPI()
 
 # CORS configuration
 origins = [
+    "https://ws.abinthomas.dev",
     "https://ws-ui-ten.vercel.app",
+    "https://wsapi.abinthomas.dev",
     "http://localhost:3000",  
     "http://127.0.0.1:3000",
 ]
