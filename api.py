@@ -20,22 +20,13 @@ origins = [
     "http://127.0.0.1:3000",
 ]
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI()
-
-# You can add additional URLs to this list, for example, the frontend's production domain, or other frontends.
-allowed_origins = [
-    "http://localhost:3000"
-]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["X-Requested-With", "Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 def srape(url, element):
@@ -68,7 +59,7 @@ def scrape(url,_class):
     try:
         headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
-        res = req.get(url, headers=headers, timeout=600)
+        res = req.get(url, headers=headers, timeout=9000)
         res.raise_for_status() 
         data = res.text
         soup = bs(data, 'html.parser')
@@ -119,7 +110,7 @@ def scrape_links(url):
     try:
          headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"}
-         res = req.get(url, headers=headers, timeout=600)
+         res = req.get(url, headers=headers, timeout=9000)
          res.raise_for_status() 
          data = res.text
          soup = bs(data, 'html.parser')
