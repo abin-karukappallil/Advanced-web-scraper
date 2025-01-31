@@ -5,3 +5,4 @@ colorama
 pyfiglet
 fastapi
 python-multipart
+uvicorn

@@ -55,9 +55,8 @@ def scrape_links(url):
          data = res.text
          soup = bs(data, 'html.parser')
          d=soup.find_all('a')
-         print(d)
          for i in d:
-            print(i.get('href'))
+            print(Fore.YELLOW+i.get('href'))
     except Exception as e:
         print(Fore.RED +"Error in fetching the data",e)
 def dork(url):
@@ -83,8 +82,8 @@ def dork(url):
             os.makedirs(os.path.dirname(file), exist_ok=True)
             with open(file, "a") as f:
               f.write(f"{_fil_link}\n")
-            print(i[2])
-         print(Fore.YELLOW +"The links are saved in Results/links.txt"+Fore.WHITE)
+            print(Fore.YELLOW+_fil_link)
+         print(Fore.WHITE +"The links are saved in Results/links.txt"+Fore.WHITE)
         else:
             print(Fore.RED+"No data found")
     except Exception as e:
@@ -112,7 +111,7 @@ styled_text=pyfiglet.figlet_format('WEB SCRAPER',font= 'doom')
 print(Fore.BLUE + styled_text)
 print(Fore.LIGHTBLUE_EX + "https://github.com/abin-karukappallil/Advanced-web-scraper\n"+Fore.WHITE)
 url = input("Enter the URL: ")
-choice = input(Fore.BLUE + "\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\n Choose an option:")
+choice = input(Fore.BLUE + "\n1. Scrape with class name.\n2. Scrape with element.\n3. Scarpe with id.\n4. Scrape hidden links\n5. Scrape confidential documents\nChoose an option: "+Fore.WHITE)
 if choice == '1':
     _class = input("Enter the class you want to scrape: ")
     scrape(url,_class)
