@@ -19,3 +19,11 @@ pip install -r requirements.txt
 ``` bash
 python main.py
 ```
+
+
+
+![image](https://github.com/user-attachments/assets/63242c07-59be-4a9a-aab1-d70f341e566a)
+
+
+![image](https://github.com/user-attachments/assets/a0cea67e-0390-44e9-ba66-965b4701a810)
+
