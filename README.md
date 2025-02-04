@@ -1,7 +1,7 @@
 [<img src="https://github.com/user-attachments/assets/0ae5661c-f57d-4c9e-aeea-e938edcd815d  " width="70"/>](web.png)
  # WebScraper
 
-## Installation
+## Installation 
 
 ### Clone Repositories
 
